@@ -39,7 +39,9 @@ form {
   flex-wrap: wrap;
 }
 
-input, select, button {
+input,
+select,
+button {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ddd;
@@ -61,7 +63,8 @@ button:hover {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 12px;
   border-bottom: 1px solid #ddd;
 }
@@ -85,7 +88,50 @@ th, td {
   margin-top: 30px;
 }
 
+.graphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
 canvas {
   margin: 20px 0;
   max-width: 100%;
+  max-height: 300px; /* Control height for better display */
+}
+
+.graph-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.graph-section canvas {
+  width: 48%; /* Adjust width for two graphs per row */
+  height: 300px; /* Set a fixed height */
+  margin-bottom: 20px;
+}
+
+.card {
+  text-align: center; /* Center align text */
+}
+
+.month-selection {
+  margin: 20px auto; /* Center the selection */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Vertically center items */
+}
+
+.month-selection label {
+  margin-right: 10px; /* Space between label and select */
+}
+
+.month-selection select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  max-width: 200px; /* Limit the width */
+  flex: 1; /* Allow to grow */
 }

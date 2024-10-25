@@ -82,7 +82,7 @@ function updateGraphs(income, expense, investment) {
   const investmentTransactions = transactions.filter(t => t.type === 'investment');
 
   // Income Bar Chart
-  new Chart(document.getElementById('incomeGraph'), {
+  const incomeGraph = new Chart(document.getElementById('incomeGraph'), {
     type: 'bar',
     data: {
       labels: incomeTransactions.map(t => t.description || 'N/A'),
@@ -92,11 +92,17 @@ function updateGraphs(income, expense, investment) {
         backgroundColor: '#28a745',
       }],
     },
-    options: { responsive: true }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // Maintain aspect ratio
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 
   // Expense Bar Chart
-  new Chart(document.getElementById('expenseGraph'), {
+  const expenseGraph = new Chart(document.getElementById('expenseGraph'), {
     type: 'bar',
     data: {
       labels: expenseTransactions.map(t => t.description || 'N/A'),
@@ -106,11 +112,17 @@ function updateGraphs(income, expense, investment) {
         backgroundColor: '#dc3545',
       }],
     },
-    options: { responsive: true }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 
   // Investment Bar Chart
-  new Chart(document.getElementById('investmentGraph'), {
+  const investmentGraph = new Chart(document.getElementById('investmentGraph'), {
     type: 'bar',
     data: {
       labels: investmentTransactions.map(t => t.description || 'N/A'),
@@ -120,11 +132,17 @@ function updateGraphs(income, expense, investment) {
         backgroundColor: '#007bff',
       }],
     },
-    options: { responsive: true }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 
   // Doughnut Chart for Income vs Expense vs Balance
-  new Chart(document.getElementById('balanceComparison'), {
+  const balanceGraph = new Chart(document.getElementById('balanceComparison'), {
     type: 'doughnut',
     data: {
       labels: ['Income', 'Expense', 'Balance'],
@@ -133,7 +151,15 @@ function updateGraphs(income, expense, investment) {
         backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
       }],
     },
-    options: { responsive: true }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+      },
+    },
   });
 
   // Month-wise Income vs Expense Line Chart
@@ -149,7 +175,7 @@ function updateGraphs(income, expense, investment) {
       .reduce((sum, t) => sum + t.amount, 0)
   );
 
-  new Chart(document.getElementById('monthlyTrends'), {
+  const trendsGraph = new Chart(document.getElementById('monthlyTrends'), {
     type: 'line',
     data: {
       labels: months,
@@ -168,7 +194,13 @@ function updateGraphs(income, expense, investment) {
         },
       ],
     },
-    options: { responsive: true }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 }
 

@@ -59,14 +59,21 @@
         <tbody></tbody>
       </table>
     </div>
+    <label for="month-select">Select Month:</label>
+    <select id="month-select">
+      <option value="all">All</option>
+      <!-- Options will be dynamically generated -->
+    </select>
 
     <div class="graph-section">
       <h2>Graphical Representation</h2>
-      <canvas id="incomeGraph"></canvas>
-      <canvas id="expenseGraph"></canvas>
-      <canvas id="investmentGraph"></canvas>
-      <canvas id="balanceComparison"></canvas>
-      <canvas id="monthlyTrends"></canvas>
+      <div class="graphs">
+        <canvas id="incomeGraph"></canvas>
+        <canvas id="expenseGraph"></canvas>
+        <canvas id="investmentGraph"></canvas>
+        <canvas id="balanceComparison"></canvas>
+        <canvas id="monthlyTrends"></canvas>
+      </div>
     </div>
   </div>
 
