@@ -5,76 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Expense Tracker</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for graphs -->
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Expense, Income & Investment Tracker</h1>
+      <h1>Income & Expense Tracker</h1>
     </header>
 
-    <div class="cards">
-      <div class="card" id="income-card">
-        <h2>Income</h2>
-        <p id="income-amount">$0</p>
+    <section class="dashboard">
+      <div class="card" id="total-income">
+        <h3>Total Income</h3>
+        <p>$<span id="income-amount">0.00</span></p>
       </div>
-      <div class="card" id="expense-card">
-        <h2>Expense</h2>
-        <p id="expense-amount">$0</p>
+      <div class="card" id="total-expense">
+        <h3>Total Expense</h3>
+        <p>$<span id="expense-amount">0.00</span></p>
       </div>
-      <div class="card" id="investment-card">
-        <h2>Investment</h2>
-        <p id="investment-amount">$0</p>
+      <div class="card" id="total-balance">
+        <h3>Total Balance</h3>
+        <p>$<span id="balance-amount">0.00</span></p>
       </div>
-      <div class="card" id="balance-card">
-        <h2>Balance</h2>
-        <p id="balance-amount">$0</p>
-      </div>
-    </div>
+    </section>
 
-    <form id="transaction-form">
-      <input type="date" id="date" required />
-      <input type="text" id="description" placeholder="Description" required />
-      <input type="number" id="amount" placeholder="Amount" required />
-      <select id="type">
+    <section class="filters">
+      <input type="month" id="month-selector" />
+      <select id="date-range">
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+        <option value="yearly">Yearly</option>
+        <option value="custom">Custom</option>
+      </select>
+      <button id="apply-filters">Apply Filters</button>
+    </section>
+
+    <section class="transaction-form">
+      <h2>Add New Transaction</h2>
+      <input type="date" id="transaction-date" required />
+      <input type="text" id="transaction-title" placeholder="Description" required />
+      <input type="number" id="transaction-amount" placeholder="Amount" required />
+      <select id="transaction-type">
         <option value="income">Income</option>
         <option value="expense">Expense</option>
-        <option value="investment">Investment</option>
       </select>
-      <button type="submit">Add Transaction</button>
-    </form>
+      <button id="add-transaction">Add Transaction</button>
+    </section>
 
-    <div class="transaction-section">
+    <section class="transaction-table">
       <h2>All Transactions</h2>
-      <table id="transaction-table">
+      <table>
         <thead>
           <tr>
             <th>Date</th>
-            <th>Description</th>
+            <th>Title</th>
             <th>Amount</th>
             <th>Type</th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="transaction-body">
+        </tbody>
       </table>
-    </div>
-    <label for="month-select">Select Month:</label>
-    <select id="month-select">
-      <option value="all">All</option>
-      <!-- Options will be dynamically generated -->
-    </select>
-
-    <div class="graph-section">
-      <h2>Graphical Representation</h2>
-      <div class="graphs">
-        <canvas id="incomeGraph"></canvas>
-        <canvas id="expenseGraph"></canvas>
-        <canvas id="investmentGraph"></canvas>
-        <canvas id="balanceComparison"></canvas>
-        <canvas id="monthlyTrends"></canvas>
-      </div>
-    </div>
+    </section>
+    
+    <section class="charts">
+      <h2>Summary</h2>
+      <canvas id="summaryChart"></canvas>
+    </section>
+    
+    <section class="charts">
+      <h2>Monthly Income & Expense Trends</h2>
+      <canvas id="monthlyChart"></canvas>
+    </section>
   </div>
 
   <script src="js/index.js"></script>

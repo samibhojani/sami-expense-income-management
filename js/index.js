@@ -1,208 +1,140 @@
-const transactionForm = document.getElementById('transaction-form');
-const transactionTable = document.querySelector('#transaction-table tbody');
-const incomeAmount = document.getElementById('income-amount');
-const expenseAmount = document.getElementById('expense-amount');
-const investmentAmount = document.getElementById('investment-amount');
-const balanceAmount = document.getElementById('balance-amount');
+const incomeDisplay = document.getElementById("income-amount");
+const expenseDisplay = document.getElementById("expense-amount");
+const balanceDisplay = document.getElementById("balance-amount");
+const transactionBody = document.getElementById("transaction-body");
 
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-// Update the UI with transactions and amounts
-function updateUI() {
-  let income = 0, expense = 0, investment = 0;
+// Update the dashboard totals and graphs
+function updateDashboard() {
+  const income = transactions
+    .filter(t => t.type === "income")
+    .reduce((acc, t) => acc + t.amount, 0);
 
-  transactionTable.innerHTML = ''; // Clear the table before re-populating
-  transactions.forEach((transaction, index) => {
-    const row = document.createElement('tr');
-    row.className = `${transaction.type}-row`;
-    row.innerHTML = `
-      <td>${transaction.date || 'N/A'}</td>
-      <td>${transaction.description || 'N/A'}</td>
-      <td>$${transaction.amount.toFixed(2)}</td>
-      <td>${transaction.type}</td>
-      <td>
-        <button onclick="editTransaction(${index})">Edit</button>
-        <button onclick="deleteTransaction(${index})">Delete</button>
-      </td>
-    `;
-    transactionTable.appendChild(row);
+  const expense = transactions
+    .filter(t => t.type === "expense")
+    .reduce((acc, t) => acc + t.amount, 0);
 
-    // Calculate totals based on transaction type
-    if (transaction.type === 'income') income += transaction.amount;
-    else if (transaction.type === 'expense') expense += transaction.amount;
-    else investment += transaction.amount;
-  });
+  const balance = income - expense;
 
-  // Update card amounts
-  incomeAmount.textContent = `$${income.toFixed(2)}`;
-  expenseAmount.textContent = `$${expense.toFixed(2)}`;
-  investmentAmount.textContent = `$${investment.toFixed(2)}`;
-  balanceAmount.textContent = `$${(income - expense).toFixed(2)}`;
+  incomeDisplay.textContent = income.toFixed(2);
+  expenseDisplay.textContent = expense.toFixed(2);
+  balanceDisplay.textContent = balance.toFixed(2);
 
-  // Update graphs
-  updateGraphs(income, expense, investment);
+  renderDonutChart(income, expense);
+  renderBarChart();
 }
 
-// Handle form submission
-transactionForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const date = document.getElementById('date').value;
-  const description = document.getElementById('description').value;
-  const amount = parseFloat(document.getElementById('amount').value);
-  const type = document.getElementById('type').value;
+// Add a new transaction
+function addTransaction() {
+  const date = document.getElementById("transaction-date").value;
+  const title = document.getElementById("transaction-title").value;
+  const amount = parseFloat(document.getElementById("transaction-amount").value);
+  const type = document.getElementById("transaction-type").value;
 
-  // Add new transaction
-  transactions.push({ date, description, amount, type });
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  updateUI();
-  transactionForm.reset();
-});
+  if (date && title && amount && type) {
+    const transaction = { date, title, amount, type };
+    transactions.push(transaction);
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    renderTransactions();
+    updateDashboard();
+  }
+}
 
-// Edit an existing transaction
-function editTransaction(index) {
-  const transaction = transactions[index];
-  document.getElementById('date').value = transaction.date;
-  document.getElementById('description').value = transaction.description;
-  document.getElementById('amount').value = transaction.amount;
-  document.getElementById('type').value = transaction.type;
-  deleteTransaction(index);
+// Render transactions in the table
+function renderTransactions() {
+  transactionBody.innerHTML = "";
+  transactions.forEach((t, index) => {
+    const row = `<tr>
+      <td>${t.date}</td>
+      <td>${t.title}</td>
+      <td>${t.amount}</td>
+      <td>${t.type}</td>
+      <td><button onclick="deleteTransaction(${index})">Delete</button></td>
+    </tr>`;
+    transactionBody.insertAdjacentHTML("beforeend", row);
+  });
 }
 
 // Delete a transaction
 function deleteTransaction(index) {
   transactions.splice(index, 1);
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  updateUI();
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+  renderTransactions();
+  updateDashboard();
 }
 
-// Update graphs using Chart.js
-function updateGraphs(income, expense, investment) {
-  const incomeTransactions = transactions.filter(t => t.type === 'income');
-  const expenseTransactions = transactions.filter(t => t.type === 'expense');
-  const investmentTransactions = transactions.filter(t => t.type === 'investment');
-
-  // Income Bar Chart
-  const incomeGraph = new Chart(document.getElementById('incomeGraph'), {
-    type: 'bar',
+// Render the Donut Chart (Income vs Expense)
+function renderDonutChart(income, expense) {
+  const ctx = document.getElementById("summaryChart").getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
     data: {
-      labels: incomeTransactions.map(t => t.description || 'N/A'),
+      labels: ["Income", "Expense"],
       datasets: [{
-        label: 'Income',
-        data: incomeTransactions.map(t => t.amount),
-        backgroundColor: '#28a745',
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false, // Maintain aspect ratio
-      scales: {
-        y: { beginAtZero: true },
-      },
-    },
+        data: [income, expense],
+        backgroundColor: ["#4caf50", "#f44336"]
+      }]
+    }
   });
+}
 
-  // Expense Bar Chart
-  const expenseGraph = new Chart(document.getElementById('expenseGraph'), {
-    type: 'bar',
+// Render the Bar Chart (Monthly Income & Expense Trends)
+function renderBarChart() {
+  const monthlyData = getMonthlyData();
+
+  const ctx = document.getElementById("monthlyChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
     data: {
-      labels: expenseTransactions.map(t => t.description || 'N/A'),
-      datasets: [{
-        label: 'Expense',
-        data: expenseTransactions.map(t => t.amount),
-        backgroundColor: '#dc3545',
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true },
-      },
-    },
-  });
-
-  // Investment Bar Chart
-  const investmentGraph = new Chart(document.getElementById('investmentGraph'), {
-    type: 'bar',
-    data: {
-      labels: investmentTransactions.map(t => t.description || 'N/A'),
-      datasets: [{
-        label: 'Investment',
-        data: investmentTransactions.map(t => t.amount),
-        backgroundColor: '#007bff',
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true },
-      },
-    },
-  });
-
-  // Doughnut Chart for Income vs Expense vs Balance
-  const balanceGraph = new Chart(document.getElementById('balanceComparison'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Income', 'Expense', 'Balance'],
-      datasets: [{
-        data: [income, expense, income - expense],
-        backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-      },
-    },
-  });
-
-  // Month-wise Income vs Expense Line Chart
-  const months = [...new Set(transactions.map(t => new Date(t.date).toLocaleString('default', { month: 'short' })))];
-
-  const monthlyIncome = months.map(month =>
-    transactions.filter(t => t.type === 'income' && new Date(t.date).toLocaleString('default', { month: 'short' }) === month)
-      .reduce((sum, t) => sum + t.amount, 0)
-  );
-
-  const monthlyExpense = months.map(month =>
-    transactions.filter(t => t.type === 'expense' && new Date(t.date).toLocaleString('default', { month: 'short' }) === month)
-      .reduce((sum, t) => sum + t.amount, 0)
-  );
-
-  const trendsGraph = new Chart(document.getElementById('monthlyTrends'), {
-    type: 'line',
-    data: {
-      labels: months,
+      labels: Object.keys(monthlyData),
       datasets: [
         {
-          label: 'Income',
-          data: monthlyIncome,
-          borderColor: '#28a745',
-          fill: false,
+          label: "Income",
+          data: Object.values(monthlyData).map(data => data.income),
+          backgroundColor: "#4caf50"
         },
         {
-          label: 'Expense',
-          data: monthlyExpense,
-          borderColor: '#dc3545',
-          fill: false,
-        },
-      ],
+          label: "Expense",
+          data: Object.values(monthlyData).map(data => data.expense),
+          backgroundColor: "#f44336"
+        }
+      ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true },
-      },
-    },
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
   });
 }
 
-// Initial UI update
-updateUI();
+// Get monthly aggregated data for the Bar Chart
+function getMonthlyData() {
+  const data = {};
+
+  transactions.forEach(t => {
+    const month = t.date.slice(0, 7); // Extract YYYY-MM format
+
+    if (!data[month]) {
+      data[month] = { income: 0, expense: 0 };
+    }
+
+    if (t.type === "income") {
+      data[month].income += t.amount;
+    } else if (t.type === "expense") {
+      data[month].expense += t.amount;
+    }
+  });
+
+  return data;
+}
+
+// Event listeners
+document.getElementById("add-transaction").addEventListener("click", addTransaction);
+
+renderTransactions();
+updateDashboard();
