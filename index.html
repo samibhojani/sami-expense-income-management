@@ -1,84 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Expense Tracker</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for graphs -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Financial Tracker</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Income & Expense Tracker</h1>
-    </header>
+    <div class="container">
+        <h1>Financial Tracker</h1>
+        <div class="tabs">
+            <button class="tab-button" onclick="switchTab('income')">Income</button>
+            <button class="tab-button" onclick="switchTab('expenses')">Expenses</button>
+            <button class="tab-button" onclick="switchTab('assets')">Assets</button>
+            <button class="tab-button" onclick="switchTab('liabilities')">Liabilities</button>
+            <button class="tab-button" onclick="switchTab('reports')">Reports</button>
+        </div>
 
-    <section class="dashboard">
-      <div class="card" id="total-income">
-        <h3>Total Income</h3>
-        <p>$<span id="income-amount">0.00</span></p>
-      </div>
-      <div class="card" id="total-expense">
-        <h3>Total Expense</h3>
-        <p>$<span id="expense-amount">0.00</span></p>
-      </div>
-      <div class="card" id="total-balance">
-        <h3>Total Balance</h3>
-        <p>$<span id="balance-amount">0.00</span></p>
-      </div>
-    </section>
+        <div id="income" class="tab">
+            <h2>Add Income</h2>
+            <form id="income-form">
+                <select name="source">
+                    <option value="Habib Schools">Habib Schools</option>
+                    <option value="Auz Solutions">Auz Solutions</option>
+                    <option value="ZurainSol">ZurainSol</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="number" name="amount" placeholder="Amount" required />
+                <input type="date" name="date" required />
+                <input type="text" name="note" placeholder="Note (optional)" />
+                <button type="submit">Add</button>
+            </form>
+            <ul id="income-list"></ul>
+        </div>
 
-    <section class="filters">
-      <input type="month" id="month-selector" />
-      <select id="date-range">
-        <option value="monthly">Monthly</option>
-        <option value="quarterly">Quarterly</option>
-        <option value="yearly">Yearly</option>
-        <option value="custom">Custom</option>
-      </select>
-      <button id="apply-filters">Apply Filters</button>
-    </section>
+        <div id="expenses" class="tab">
+            <h2>Add Expense</h2>
+            <form id="expense-form">
+                <input type="text" name="category" placeholder="Category" required />
+                <input type="number" name="amount" placeholder="Amount" required />
+                <input type="date" name="date" required />
+                <input type="text" name="note" placeholder="Note (optional)" />
+                <button type="submit">Add</button>
+            </form>
+            <ul id="expense-list"></ul>
+        </div>
 
-    <section class="transaction-form">
-      <h2>Add New Transaction</h2>
-      <input type="date" id="transaction-date" required />
-      <input type="text" id="transaction-title" placeholder="Description" required />
-      <input type="number" id="transaction-amount" placeholder="Amount" required />
-      <select id="transaction-type">
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-      </select>
-      <button id="add-transaction">Add Transaction</button>
-    </section>
+        <div id="assets" class="tab">
+            <h2>Assets & ROI</h2>
+            <form id="asset-form">
+                <input type="text" name="asset" placeholder="Asset Name" required />
+                <input type="number" name="value" placeholder="Value" required />
+                <input type="number" name="roi" placeholder="ROI (%)" />
+                <input type="date" name="date" required />
+                <button type="submit">Add</button>
+            </form>
+            <ul id="asset-list"></ul>
+        </div>
 
-    <section class="transaction-table">
-      <h2>All Transactions</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Title</th>
-            <th>Amount</th>
-            <th>Type</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="transaction-body">
-        </tbody>
-      </table>
-    </section>
-    
-    <section class="charts">
-      <h2>Summary</h2>
-      <canvas id="summaryChart"></canvas>
-    </section>
-    
-    <section class="charts">
-      <h2>Monthly Income & Expense Trends</h2>
-      <canvas id="monthlyChart"></canvas>
-    </section>
-  </div>
+        <div id="liabilities" class="tab">
+            <h2>Liabilities</h2>
+            <form id="liability-form">
+                <input type="text" name="name" placeholder="Liability Name" required />
+                <input type="number" name="amount" placeholder="Amount" required />
+                <input type="date" name="date" required />
+                <button type="submit">Add</button>
+            </form>
+            <ul id="liability-list"></ul>
+        </div>
 
-  <script src="js/index.js"></script>
+        <div id="reports" class="tab">
+            <h2>Reports</h2>
+            <label>From: <input type="date" id="report-from" /></label>
+            <label>To: <input type="date" id="report-to" /></label>
+            <button onclick="generateReport()">Generate</button>
+            <div id="report-output"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

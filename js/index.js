@@ -1,140 +1,133 @@
-const incomeDisplay = document.getElementById("income-amount");
-const expenseDisplay = document.getElementById("expense-amount");
-const balanceDisplay = document.getElementById("balance-amount");
-const transactionBody = document.getElementById("transaction-body");
+document.addEventListener("DOMContentLoaded", () => {
+    const tabs = document.querySelectorAll(".tab");
+    const storageKeys = {
+        income: "incomes",
+        expenses: "expenses",
+        assets: "assets",
+        liabilities: "liabilities"
+    };
 
-let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-
-// Update the dashboard totals and graphs
-function updateDashboard() {
-  const income = transactions
-    .filter(t => t.type === "income")
-    .reduce((acc, t) => acc + t.amount, 0);
-
-  const expense = transactions
-    .filter(t => t.type === "expense")
-    .reduce((acc, t) => acc + t.amount, 0);
-
-  const balance = income - expense;
-
-  incomeDisplay.textContent = income.toFixed(2);
-  expenseDisplay.textContent = expense.toFixed(2);
-  balanceDisplay.textContent = balance.toFixed(2);
-
-  renderDonutChart(income, expense);
-  renderBarChart();
-}
-
-// Add a new transaction
-function addTransaction() {
-  const date = document.getElementById("transaction-date").value;
-  const title = document.getElementById("transaction-title").value;
-  const amount = parseFloat(document.getElementById("transaction-amount").value);
-  const type = document.getElementById("transaction-type").value;
-
-  if (date && title && amount && type) {
-    const transaction = { date, title, amount, type };
-    transactions.push(transaction);
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    renderTransactions();
-    updateDashboard();
-  }
-}
-
-// Render transactions in the table
-function renderTransactions() {
-  transactionBody.innerHTML = "";
-  transactions.forEach((t, index) => {
-    const row = `<tr>
-      <td>${t.date}</td>
-      <td>${t.title}</td>
-      <td>${t.amount}</td>
-      <td>${t.type}</td>
-      <td><button onclick="deleteTransaction(${index})">Delete</button></td>
-    </tr>`;
-    transactionBody.insertAdjacentHTML("beforeend", row);
-  });
-}
-
-// Delete a transaction
-function deleteTransaction(index) {
-  transactions.splice(index, 1);
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  renderTransactions();
-  updateDashboard();
-}
-
-// Render the Donut Chart (Income vs Expense)
-function renderDonutChart(income, expense) {
-  const ctx = document.getElementById("summaryChart").getContext("2d");
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Income", "Expense"],
-      datasets: [{
-        data: [income, expense],
-        backgroundColor: ["#4caf50", "#f44336"]
-      }]
+    function switchTab(tabId) {
+        tabs.forEach(tab => tab.classList.remove("active"));
+        document.getElementById(tabId).classList.add("active");
     }
-  });
-}
+    window.switchTab = switchTab;
 
-// Render the Bar Chart (Monthly Income & Expense Trends)
-function renderBarChart() {
-  const monthlyData = getMonthlyData();
+    function loadData(type) {
+        const list = document.getElementById(`${type}-list`);
+        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
+        list.innerHTML = data.map((item, index) => `
+            <li>
+                ${Object.values(item).join(" | ")}
+                <button onclick="editEntry('${type}', ${index})">Edit</button>
+                <button onclick="deleteEntry('${type}', ${index})">Delete</button>
+            </li>
+        `).join("");
+    }
 
-  const ctx = document.getElementById("monthlyChart").getContext("2d");
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: Object.keys(monthlyData),
-      datasets: [
-        {
-          label: "Income",
-          data: Object.values(monthlyData).map(data => data.income),
-          backgroundColor: "#4caf50"
-        },
-        {
-          label: "Expense",
-          data: Object.values(monthlyData).map(data => data.expense),
-          backgroundColor: "#f44336"
+    function addEntry(formId, type) {
+        const form = document.getElementById(formId);
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const entry = Object.fromEntries(formData);
+            const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
+            const index = form.dataset.editIndex;
+
+            if (index !== undefined && index !== "") {
+                data[parseInt(index)] = entry;
+                delete form.dataset.editIndex;
+            } else {
+                data.push(entry);
+            }
+
+            localStorage.setItem(storageKeys[type], JSON.stringify(data));
+            loadData(type);
+            form.reset();
+        });
+    }
+
+    window.editEntry = function(type, index) {
+        const formId = `${type}-form`;
+        const form = document.getElementById(formId);
+        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
+        const item = data[index];
+
+        Object.entries(item).forEach(([key, value]) => {
+            const field = form.elements.namedItem(key);
+            if (field) field.value = value;
+        });
+
+        form.dataset.editIndex = index;
+    };
+
+    window.deleteEntry = function(type, index) {
+        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
+        data.splice(index, 1);
+        localStorage.setItem(storageKeys[type], JSON.stringify(data));
+        loadData(type);
+    };
+
+    function generateReport() {
+        const from = new Date(document.getElementById("report-from").value);
+        const to = new Date(document.getElementById("report-to").value);
+        const output = document.getElementById("report-output");
+
+        const report = {};
+        const monthlySummary = {};
+
+        Object.entries(storageKeys).forEach(([type, key]) => {
+            const data = JSON.parse(localStorage.getItem(key) || "[]");
+            const filtered = data.filter(d => {
+                const date = new Date(d.date);
+                return (!isNaN(from) ? date >= from : true) && (!isNaN(to) ? date <= to : true);
+            });
+
+            const sum = filtered.reduce((acc, cur) => acc + (parseFloat(cur.amount || cur.value || 0)), 0);
+            report[type] = sum;
+
+            // Monthly breakdown
+            filtered.forEach(item => {
+                const date = new Date(item.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (!monthlySummary[monthKey]) monthlySummary[monthKey] = { income: 0, expenses: 0 };
+                if (type === "income") monthlySummary[monthKey].income += parseFloat(item.amount || 0);
+                if (type === "expenses") monthlySummary[monthKey].expenses += parseFloat(item.amount || 0);
+            });
+        });
+
+        // Net balance
+        const netBalance = (report.income || 0) - (report.expenses || 0);
+
+        // Create Monthly Summary HTML
+        let monthlyHtml = "<h4>Monthly Summary</h4><ul>";
+        for (const [month, data] of Object.entries(monthlySummary)) {
+            const net = data.income - data.expenses;
+            monthlyHtml += `<li>${month} - Income: ${data.income}, Expenses: ${data.expenses}, Net: ${net}</li>`;
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
+        monthlyHtml += "</ul>";
+
+        output.innerHTML = `
+            <h3>Summary</h3>
+            <p><strong>Total Income:</strong> ${report.income}</p>
+            <p><strong>Total Expenses:</strong> ${report.expenses}</p>
+            <p><strong>Total Assets:</strong> ${report.assets}</p>
+            <p><strong>Total Liabilities:</strong> ${report.liabilities}</p>
+            <p><strong>Net Balance:</strong> ${netBalance}</p>
+            ${monthlyHtml}
+        `;
     }
-  });
-}
+    window.generateReport = generateReport;
 
-// Get monthly aggregated data for the Bar Chart
-function getMonthlyData() {
-  const data = {};
+    addEntry("income-form", "income");
+    addEntry("expense-form", "expenses");
+    addEntry("asset-form", "assets");
+    addEntry("liability-form", "liabilities");
 
-  transactions.forEach(t => {
-    const month = t.date.slice(0, 7); // Extract YYYY-MM format
+    loadData("income");
+    loadData("expenses");
+    loadData("assets");
+    loadData("liabilities");
 
-    if (!data[month]) {
-      data[month] = { income: 0, expense: 0 };
-    }
-
-    if (t.type === "income") {
-      data[month].income += t.amount;
-    } else if (t.type === "expense") {
-      data[month].expense += t.amount;
-    }
-  });
-
-  return data;
-}
-
-// Event listeners
-document.getElementById("add-transaction").addEventListener("click", addTransaction);
-
-renderTransactions();
-updateDashboard();
+    switchTab("income");
+});

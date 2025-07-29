@@ -1,184 +1,61 @@
-/* General Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
 body {
-  background-color: #f0f2f5;
-  color: #333;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
 }
 
-/* Main Container */
 .container {
-  max-width: 1200px;
-  width: 100%;
-  background-color: #fff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 30px;
-  overflow: hidden;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
 }
 
-/* Header */
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 600;
-  color: #1e88e5;
-}
-
-/* Dashboard Cards */
-.dashboard {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.card {
-  flex: 1;
-  padding: 20px;
-  background: linear-gradient(145deg, #ffffff, #f0f0f0);
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 5px 5px 15px #ddd, -5px -5px 15px #fff;
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: scale(1.05);
-}
-
-.card h2 {
-  font-size: 22px;
-  color: #555;
-}
-
-.card p {
-  font-size: 28px;
-  margin-top: 5px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* Forms and Buttons */
-form {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-input, select {
-  width: 100%;
-  padding: 12px 15px;
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  transition: 0.3s;
-}
-
-input:focus, select:focus {
-  border-color: #1e88e5;
-  box-shadow: 0 0 8px rgba(30, 136, 229, 0.2);
-}
-
-button {
-  padding: 12px 20px;
-  background-color: #1e88e5;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #1565c0;
-}
-
-/* Transaction Table */
-.table-container {
-  margin-top: 20px;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 30px;
-}
-
-thead {
-  background-color: #1e88e5;
-  color: white;
-}
-
-thead th {
-  padding: 15px;
-  text-align: left;
-}
-
-tbody td {
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
-}
-
-tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
-tbody button {
-  background-color: #f44336;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 5px;
-}
-
-tbody button:hover {
-  background-color: #d32f2f;
-}
-
-/* Charts Section */
-.charts {
-  margin-top: 40px;
-}
-
-.charts h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-  font-weight: 600;
-}
-
-canvas {
-  display: block;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .dashboard {
-    flex-direction: column;
+.tabs {
+    display: flex;
     gap: 10px;
-  }
+    margin-bottom: 20px;
+}
 
-  form {
-    flex-direction: column;
-  }
+.tab-button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-  button {
-    width: 100%;
-  }
+.tab-button:hover {
+    background-color: #0056b3;
+}
+
+.tab {
+    display: none;
+}
+
+.tab.active {
+    display: block;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input, select, button {
+    padding: 8px;
+    margin: 5px;
+    width: 200px;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
 }
