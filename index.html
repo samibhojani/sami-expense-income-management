@@ -1,82 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Financial Tracker</title>
-    <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance Tracker</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Financial Tracker</h1>
-        <div class="tabs">
-            <button class="tab-button" onclick="switchTab('income')">Income</button>
-            <button class="tab-button" onclick="switchTab('expenses')">Expenses</button>
-            <button class="tab-button" onclick="switchTab('assets')">Assets</button>
-            <button class="tab-button" onclick="switchTab('liabilities')">Liabilities</button>
-            <button class="tab-button" onclick="switchTab('reports')">Reports</button>
-        </div>
-
-        <div id="income" class="tab">
-            <h2>Add Income</h2>
-            <form id="income-form">
-                <select name="source">
-                    <option value="Habib Schools">Habib Schools</option>
-                    <option value="Auz Solutions">Auz Solutions</option>
-                    <option value="ZurainSol">ZurainSol</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="number" name="amount" placeholder="Amount" required />
-                <input type="date" name="date" required />
-                <input type="text" name="note" placeholder="Note (optional)" />
-                <button type="submit">Add</button>
-            </form>
-            <ul id="income-list"></ul>
-        </div>
-
-        <div id="expenses" class="tab">
-            <h2>Add Expense</h2>
-            <form id="expense-form">
-                <input type="text" name="category" placeholder="Category" required />
-                <input type="number" name="amount" placeholder="Amount" required />
-                <input type="date" name="date" required />
-                <input type="text" name="note" placeholder="Note (optional)" />
-                <button type="submit">Add</button>
-            </form>
-            <ul id="expense-list"></ul>
-        </div>
-
-        <div id="assets" class="tab">
-            <h2>Assets & ROI</h2>
-            <form id="asset-form">
-                <input type="text" name="asset" placeholder="Asset Name" required />
-                <input type="number" name="value" placeholder="Value" required />
-                <input type="number" name="roi" placeholder="ROI (%)" />
-                <input type="date" name="date" required />
-                <button type="submit">Add</button>
-            </form>
-            <ul id="asset-list"></ul>
-        </div>
-
-        <div id="liabilities" class="tab">
-            <h2>Liabilities</h2>
-            <form id="liability-form">
-                <input type="text" name="name" placeholder="Liability Name" required />
-                <input type="number" name="amount" placeholder="Amount" required />
-                <input type="date" name="date" required />
-                <button type="submit">Add</button>
-            </form>
-            <ul id="liability-list"></ul>
-        </div>
-
-        <div id="reports" class="tab">
-            <h2>Reports</h2>
-            <label>From: <input type="date" id="report-from" /></label>
-            <label>To: <input type="date" id="report-to" /></label>
-            <button onclick="generateReport()">Generate</button>
-            <div id="report-output"></div>
-        </div>
+  <div class="container">
+    <h1>Finance Tracker</h1>
+    <div class="tabs">
+      <button class="tab-button active" data-tab="income">Income</button>
+      <button class="tab-button" data-tab="expense">Expense</button>
+      <button class="tab-button" data-tab="zurainsol">ZurainSol</button>
+      <button class="tab-button" data-tab="assets">Assets</button>
+      <button class="tab-button" data-tab="liabilities">Liabilities</button>
+      <button class="tab-button" data-tab="stats">Stats</button>
     </div>
-    <script src="script.js"></script>
+
+    <div class="tab-content active" id="income">
+      <h2>Income</h2>
+      <form id="income-form">
+        <input type="date" name="date" required />
+        <input type="text" name="source" placeholder="Source" required />
+        <input type="number" name="amount" placeholder="Amount" required />
+        <button type="submit">Add Income</button>
+      </form>
+      <table id="income-table"></table>
+    </div>
+
+    <div class="tab-content" id="expense">
+      <h2>Expense</h2>
+      <form id="expense-form">
+        <input type="date" name="date" required />
+        <input type="text" name="category" placeholder="Category" required />
+        <input type="number" name="amount" placeholder="Amount" required />
+        <button type="submit">Add Expense</button>
+      </form>
+      <table id="expense-table"></table>
+    </div>
+
+    <div class="tab-content" id="zurainsol">
+      <h2>ZurainSol</h2>
+      <form id="zurainsol-form">
+        <input type="date" name="date" required />
+        <input type="text" name="client" placeholder="Client" required />
+        <input type="number" name="income" placeholder="Income" required />
+        <input type="number" name="due" placeholder="Due" required />
+        <button type="submit">Add Entry</button>
+      </form>
+      <table id="zurainsol-table"></table>
+    </div>
+
+    <div class="tab-content" id="assets">
+      <h2>Assets</h2>
+      <form id="assets-form">
+        <input type="date" name="date" required />
+        <input type="text" name="investment" placeholder="Investment Type" required />
+        <input type="number" name="amount" placeholder="Amount" required />
+        <input type="number" name="roi" placeholder="ROI %" required />
+        <button type="submit">Add Asset</button>
+      </form>
+      <table id="assets-table"></table>
+    </div>
+
+    <div class="tab-content" id="liabilities">
+      <h2>Liabilities</h2>
+      <form id="liabilities-form">
+        <input type="date" name="date" required />
+        <input type="text" name="type" placeholder="Type (e.g. Loan)" required />
+        <input type="number" name="amount" placeholder="Amount" required />
+        <button type="submit">Add Liability</button>
+      </form>
+      <table id="liabilities-table"></table>
+    </div>
+
+    <div class="tab-content" id="stats">
+      <h2>Statistics</h2>
+      <div id="stats-content"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>

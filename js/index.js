@@ -1,133 +1,74 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const tabs = document.querySelectorAll(".tab");
-    const storageKeys = {
-        income: "incomes",
-        expenses: "expenses",
-        assets: "assets",
-        liabilities: "liabilities"
-    };
+  const tabs = document.querySelectorAll(".tab-button");
+  const contents = document.querySelectorAll(".tab-content");
 
-    function switchTab(tabId) {
-        tabs.forEach(tab => tab.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
-    }
-    window.switchTab = switchTab;
+  tabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabs.forEach(b => b.classList.remove("active"));
+      contents.forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    });
+  });
 
-    function loadData(type) {
-        const list = document.getElementById(`${type}-list`);
-        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
-        list.innerHTML = data.map((item, index) => `
-            <li>
-                ${Object.values(item).join(" | ")}
-                <button onclick="editEntry('${type}', ${index})">Edit</button>
-                <button onclick="deleteEntry('${type}', ${index})">Delete</button>
-            </li>
-        `).join("");
-    }
+  const sections = ["income", "expense", "zurainsol", "assets", "liabilities"];
 
-    function addEntry(formId, type) {
-        const form = document.getElementById(formId);
-        form.addEventListener("submit", e => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const entry = Object.fromEntries(formData);
-            const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
-            const index = form.dataset.editIndex;
+  sections.forEach(section => {
+    const form = document.getElementById(`${section}-form`);
+    const table = document.getElementById(`${section}-table`);
 
-            if (index !== undefined && index !== "") {
-                data[parseInt(index)] = entry;
-                delete form.dataset.editIndex;
-            } else {
-                data.push(entry);
-            }
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const entry = Object.fromEntries(data.entries());
+      entry.id = Date.now();
+      const entries = JSON.parse(localStorage.getItem(section) || "[]");
+      entries.push(entry);
+      localStorage.setItem(section, JSON.stringify(entries));
+      form.reset();
+      loadTable(section, table);
+      updateStats();
+    });
 
-            localStorage.setItem(storageKeys[type], JSON.stringify(data));
-            loadData(type);
-            form.reset();
-        });
-    }
+    loadTable(section, table);
+  });
 
-    window.editEntry = function(type, index) {
-        const formId = `${type}-form`;
-        const form = document.getElementById(formId);
-        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
-        const item = data[index];
+  function loadTable(section, table) {
+    const data = JSON.parse(localStorage.getItem(section) || "[]");
+    table.innerHTML = "";
+    if (!data.length) return;
+    const headers = Object.keys(data[0]);
+    const thead = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+    const rows = data.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join("")}</tr>`).join("");
+    table.innerHTML = thead + rows;
+  }
 
-        Object.entries(item).forEach(([key, value]) => {
-            const field = form.elements.namedItem(key);
-            if (field) field.value = value;
-        });
+  function updateStats() {
+    const income = JSON.parse(localStorage.getItem("income") || "[]");
+    const expense = JSON.parse(localStorage.getItem("expense") || "[]");
+    const zurainsol = JSON.parse(localStorage.getItem("zurainsol") || "[]");
+    const assets = JSON.parse(localStorage.getItem("assets") || "[]");
+    const liabilities = JSON.parse(localStorage.getItem("liabilities") || "[]");
 
-        form.dataset.editIndex = index;
-    };
+    const totalIncome = income.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+    const totalExpense = expense.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+    const zsIncome = zurainsol.reduce((sum, e) => sum + parseFloat(e.income), 0);
+    const zsDue = zurainsol.reduce((sum, e) => sum + parseFloat(e.due), 0);
+    const assetValue = assets.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+    const roi = assets.reduce((sum, e) => sum + (parseFloat(e.amount) * parseFloat(e.roi || 0) / 100), 0);
+    const liability = liabilities.reduce((sum, e) => sum + parseFloat(e.amount), 0);
 
-    window.deleteEntry = function(type, index) {
-        const data = JSON.parse(localStorage.getItem(storageKeys[type]) || "[]");
-        data.splice(index, 1);
-        localStorage.setItem(storageKeys[type], JSON.stringify(data));
-        loadData(type);
-    };
+    document.getElementById("stats-content").innerHTML = `
+      <p><strong>Total Income:</strong> Rs. ${totalIncome.toFixed(2)}</p>
+      <p><strong>Total Expense:</strong> Rs. ${totalExpense.toFixed(2)}</p>
+      <p><strong>ZurainSol Income:</strong> Rs. ${zsIncome.toFixed(2)}</p>
+      <p><strong>ZurainSol Dues:</strong> Rs. ${zsDue.toFixed(2)}</p>
+      <p><strong>Assets Value:</strong> Rs. ${assetValue.toFixed(2)}</p>
+      <p><strong>Total ROI:</strong> Rs. ${roi.toFixed(2)}</p>
+      <p><strong>Total Liabilities:</strong> Rs. ${liability.toFixed(2)}</p>
+      <p><strong>Net Worth:</strong> Rs. ${(totalIncome + zsIncome + roi + assetValue - totalExpense - liability).toFixed(2)}</p>
+    `;
+  }
 
-    function generateReport() {
-        const from = new Date(document.getElementById("report-from").value);
-        const to = new Date(document.getElementById("report-to").value);
-        const output = document.getElementById("report-output");
-
-        const report = {};
-        const monthlySummary = {};
-
-        Object.entries(storageKeys).forEach(([type, key]) => {
-            const data = JSON.parse(localStorage.getItem(key) || "[]");
-            const filtered = data.filter(d => {
-                const date = new Date(d.date);
-                return (!isNaN(from) ? date >= from : true) && (!isNaN(to) ? date <= to : true);
-            });
-
-            const sum = filtered.reduce((acc, cur) => acc + (parseFloat(cur.amount || cur.value || 0)), 0);
-            report[type] = sum;
-
-            // Monthly breakdown
-            filtered.forEach(item => {
-                const date = new Date(item.date);
-                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                if (!monthlySummary[monthKey]) monthlySummary[monthKey] = { income: 0, expenses: 0 };
-                if (type === "income") monthlySummary[monthKey].income += parseFloat(item.amount || 0);
-                if (type === "expenses") monthlySummary[monthKey].expenses += parseFloat(item.amount || 0);
-            });
-        });
-
-        // Net balance
-        const netBalance = (report.income || 0) - (report.expenses || 0);
-
-        // Create Monthly Summary HTML
-        let monthlyHtml = "<h4>Monthly Summary</h4><ul>";
-        for (const [month, data] of Object.entries(monthlySummary)) {
-            const net = data.income - data.expenses;
-            monthlyHtml += `<li>${month} - Income: ${data.income}, Expenses: ${data.expenses}, Net: ${net}</li>`;
-        }
-        monthlyHtml += "</ul>";
-
-        output.innerHTML = `
-            <h3>Summary</h3>
-            <p><strong>Total Income:</strong> ${report.income}</p>
-            <p><strong>Total Expenses:</strong> ${report.expenses}</p>
-            <p><strong>Total Assets:</strong> ${report.assets}</p>
-            <p><strong>Total Liabilities:</strong> ${report.liabilities}</p>
-            <p><strong>Net Balance:</strong> ${netBalance}</p>
-            ${monthlyHtml}
-        `;
-    }
-    window.generateReport = generateReport;
-
-    addEntry("income-form", "income");
-    addEntry("expense-form", "expenses");
-    addEntry("asset-form", "assets");
-    addEntry("liability-form", "liabilities");
-
-    loadData("income");
-    loadData("expenses");
-    loadData("assets");
-    loadData("liabilities");
-
-    switchTab("income");
+  updateStats();
 });
